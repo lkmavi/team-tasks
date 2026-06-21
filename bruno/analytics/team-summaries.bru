@@ -1,0 +1,15 @@
+meta {
+  name: Team Summaries
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/analytics/team-summaries
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

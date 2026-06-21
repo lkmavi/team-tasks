@@ -1,0 +1,114 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  enable:
+    # Bug detection
+    - govet
+    - staticcheck
+    - errcheck
+    - errorlint
+    - gosec
+    - nilerr
+    - nilnil
+    - ineffassign
+
+    # Code quality
+    - gocyclo
+    - gocognit
+    - funlen
+    - nestif
+
+    # Style
+    - misspell
+    - unconvert
+    - unparam
+    - errname
+    - revive
+
+    # Performance
+    - prealloc
+    - bodyclose
+
+    # Practices
+    - goconst
+    - gocritic
+    - nolintlint
+    - dupl
+    - durationcheck
+
+  settings:
+    gocyclo:
+      min-complexity: 15
+
+    gocognit:
+      min-complexity: 20
+
+    funlen:
+      lines: 80
+      statements: 50
+
+    nestif:
+      min-complexity: 4
+
+    misspell:
+      locale: US
+
+    revive:
+      rules:
+        - name: var-naming
+        - name: error-return
+        - name: error-naming
+        - name: if-return
+        - name: increment-decrement
+        - name: var-declaration
+        - name: range
+        - name: receiver-naming
+        - name: unexported-return
+        - name: indent-error-flow
+        - name: errorf
+        - name: empty-block
+        - name: superfluous-else
+        - name: unreachable-code
+
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - style
+        - performance
+      disabled-checks:
+        - commentFormatting
+        - unnamedResult
+        - commentedOutCode
+        - hugeParam
+
+  exclusions:
+    paths:
+      - pkg/slogx
+      - internal/handler/api/
+      - internal/.*/mocks
+      - scripts/genschema
+
+    rules:
+      - path: _test\.go
+        linters:
+          - gocyclo
+          - funlen
+          - errcheck
+          - gosec
+          - goconst
+          - dupl
+          - gocognit
+
+      - path: internal/storage/mysql
+        linters:
+          - dupl
+          - nilnil
+
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

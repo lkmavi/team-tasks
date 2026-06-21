@@ -1,0 +1,21 @@
+meta {
+  name: Add Comment
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/tasks/{{taskId}}/comments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "body": "Started working on the design mockups."
+  }
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Invite Member
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/teams/{{teamId}}/invite
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "user_id": "{{invitedUserId}}"
+  }
+}

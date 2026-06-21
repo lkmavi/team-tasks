@@ -1,0 +1,23 @@
+meta {
+  name: Update Task
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/tasks/{{taskId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "status": "in_progress",
+    "title": "Implement login page (revised)",
+    "priority": "medium"
+  }
+}
