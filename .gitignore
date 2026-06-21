@@ -1,0 +1,72 @@
+# Secrets
+.env
+*.pem
+*.key
+*.crt
+
+# Go build output
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go test & coverage
+*.test
+*.out
+coverage.txt
+coverage-*.txt
+coverage.html
+coverage-report/
+
+# Go workspace
+vendor/
+go.work
+go.work.sum
+
+# Go generated (keep generated API code, ignore tool caches)
+__debug_bin*
+
+# Docker
+.docker/
+
+# IDE — JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# IDE — VS Code
+.vscode/
+*.code-workspace
+
+# IDE — Vim / Emacs
+*.swp
+*.swo
+*~
+\#*\#
+.\#*
+
+# OS — macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# OS — Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# OS — Linux
+.fuse_hidden*
+.Trash-*
+
+# Logs
+*.log
+logs/
+
+# Temp
+tmp/
+temp/
