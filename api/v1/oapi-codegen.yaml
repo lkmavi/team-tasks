@@ -1,0 +1,6 @@
+package: v1
+output: api/v1/api.gen.go
+generate:
+  chi-server: true
+  models: true
+  strict-server: true
