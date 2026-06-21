@@ -1,0 +1,31 @@
+meta {
+  name: Create Task
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/tasks
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "team_id": "{{teamId}}",
+    "title": "Implement login page",
+    "description": "Build the login form with email and password fields",
+    "priority": "high",
+    "due_date": "2026-07-01"
+  }
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setEnvVar("taskId", res.body.id);
+  }
+}

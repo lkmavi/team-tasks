@@ -1,0 +1,186 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write  # Required for Codecov OIDC token
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Build
+        run: go build ./...
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run tests with race detector
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./internal/... ./cmd/... ./scripts/...
+
+      - name: Check coverage (≥85%)
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.txt \
+            | grep "^total:" | awk '{print $3}' | sed 's/%//')
+          echo "Total coverage: ${COVERAGE}%"
+          if awk -v cov="$COVERAGE" 'BEGIN {exit !(cov >= 85.0)}'; then
+            echo "Coverage requirement met (≥85%)"
+          else
+            echo "::warning::Coverage is ${COVERAGE}% (below 85% threshold)"
+          fi
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          files: ./coverage.txt
+          flags: unittests
+          name: codecov-team-tasks
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+          args: --timeout=5m
+
+  formatting:
+    name: Formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Check formatting
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "ERROR: The following files are not formatted:"
+            gofmt -l .
+            echo ""
+            echo "Run 'go fmt ./...' to fix formatting issues."
+            exit 1
+          fi
+          echo "All files are properly formatted"
+
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run integration tests with coverage
+        run: |
+          go test -v -race -count=1 -timeout 5m -tags integration \
+            -coverprofile=coverage-integration.txt \
+            -covermode=atomic \
+            -coverpkg=./internal/...,./pkg/logger \
+            ./tests/...
+
+      - name: Upload integration coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          files: ./coverage-integration.txt
+          flags: integration
+          name: codecov-team-tasks-integration
+
+  deps:
+    name: Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Install go-mod-outdated
+        run: go install github.com/psampaz/go-mod-outdated@latest
+
+      - name: Check direct dependencies for updates
+        run: |
+          OUTDATED=$(go list -u -m -json all 2>/dev/null \
+            | go-mod-outdated -update -direct || true)
+          if [ -n "$OUTDATED" ]; then
+            echo "$OUTDATED"
+            echo "::warning::Some direct dependencies have updates available"
+          else
+            echo "All direct dependencies are up to date!"
+          fi

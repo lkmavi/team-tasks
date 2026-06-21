@@ -1,0 +1,15 @@
+meta {
+  name: Orphan Tasks
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/analytics/orphan-tasks
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
